@@ -7,20 +7,19 @@ const Editor = () => {
 	const [searchParams] = useSearchParams();
 	const canvasRef = useRef(null);
 	const canvasInstanceRef = useRef(null);
-	const [captionText, setCaptionText] = useState(""); // State to store the caption input
-	const [hasActiveObject, setHasActiveObject] = useState(false); // State to track active object(s)
+	const [captionText, setCaptionText] = useState("");
+	const [hasActiveObject, setHasActiveObject] = useState(false);
+	const [isImageLoading, setIsImageLoading] = useState(true); // Add loading state for image
 
 	useEffect(() => {
-		// Initialize canvas with multi-selection enabled
 		const canvas = new fabric.Canvas(canvasRef.current, {
 			width: 600,
 			height: 400,
 			backgroundColor: "#f0f0f0",
-			selection: true, // Enable selection
+			selection: true,
 		});
 		canvasInstanceRef.current = canvas;
 
-		// Update active object state when selection changes
 		canvas.on("selection:created", () => setHasActiveObject(true));
 		canvas.on("selection:updated", () => setHasActiveObject(true));
 		canvas.on("selection:cleared", () => setHasActiveObject(false));
@@ -28,22 +27,23 @@ const Editor = () => {
 		const imageUrl = searchParams.get("image");
 		if (!imageUrl) {
 			console.error("No image URL provided");
+			setIsImageLoading(false); // Stop loading if no URL
 			return;
 		}
 
 		const decodedUrl = decodeURIComponent(imageUrl);
 
-		// Load image using Fabric.js directly
+		setIsImageLoading(true); // Start loading
 		fabric.Image.fromURL(
 			decodedUrl,
 			(fabricImg) => {
 				if (!fabricImg) {
 					console.error("Failed to load image");
 					alert("Failed to load image. Please try another one.");
+					setIsImageLoading(false);
 					return;
 				}
 
-				// Scale image to fit canvas
 				const scale = Math.min(600 / fabricImg.width, 400 / fabricImg.height);
 				fabricImg.scaleToWidth(600 * scale);
 				fabricImg.scaleToHeight(400 * scale);
@@ -55,18 +55,18 @@ const Editor = () => {
 					crossOrigin: "anonymous",
 				});
 
-				// Set as background image
 				canvas.setBackgroundImage(fabricImg, canvas.renderAll.bind(canvas), {
 					scaleX: scale,
 					scaleY: scale,
 					left: 0,
 					top: 0,
 				});
+
+				setIsImageLoading(false); // Stop loading once image is loaded
 			},
 			{ crossOrigin: "anonymous" }
 		);
 
-		// Cleanup
 		return () => {
 			if (canvasInstanceRef.current) {
 				canvasInstanceRef.current.dispose();
@@ -99,8 +99,6 @@ const Editor = () => {
 		canvas.add(text);
 		canvas.setActiveObject(text);
 		canvas.renderAll();
-
-		// Reset the input
 		setCaptionText("");
 	};
 
@@ -179,7 +177,7 @@ const Editor = () => {
 		activeObjects.forEach((object) => {
 			canvas.remove(object);
 		});
-		canvas.discardActiveObject(); // Clear the selection
+		canvas.discardActiveObject();
 		canvas.renderAll();
 	};
 
@@ -199,7 +197,6 @@ const Editor = () => {
 		link.click();
 	};
 
-	// Handle form submission for caption input (Enter key or button click)
 	const handleCaptionSubmit = (e) => {
 		e.preventDefault();
 		addText();
@@ -209,14 +206,17 @@ const Editor = () => {
 		<div className="editor-container">
 			<h1>Image Editor</h1>
 			<div className="editor-layout">
-				{/* Left Side: Canvas */}
 				<div className="canvas-container">
 					<canvas ref={canvasRef} className="editor-canvas" />
+					{isImageLoading && (
+						<div className="canvas-loader">
+							<div className="spinner"></div>
+							<p>Loading image...</p>
+						</div>
+					)}
 				</div>
 
-				{/* Right Side: Buttons in a Box */}
 				<div className="button-box">
-					{/* Line 1: Caption Form */}
 					<form onSubmit={handleCaptionSubmit} className="caption-form">
 						<span className="caption-label">Add Caption:</span>
 						<div className="caption-input-group">
@@ -228,33 +228,26 @@ const Editor = () => {
 								autoFocus
 							/>
 							<button type="submit">Add</button>
-							<button
-								type="button"
-								onClick={() => setCaptionText("")} // Clear the input
-							>
+							<button type="button" onClick={() => setCaptionText("")}>
 								Clear
 							</button>
 						</div>
 					</form>
 
-					{/* Line 2: Add Triangle and Add Rectangle */}
 					<div className="button-row">
 						<button onClick={() => addShape("triangle")}>Add Triangle</button>
 						<button onClick={() => addShape("rectangle")}>Add Rectangle</button>
 					</div>
 
-					{/* Line 3: Add Circle and Add Polygon */}
 					<div className="button-row">
 						<button onClick={() => addShape("circle")}>Add Circle</button>
 						<button onClick={() => addShape("polygon")}>Add Polygon</button>
 					</div>
 
-					{/* Line 4: Remove Selected */}
 					<button onClick={removeSelected} className="remove-button" disabled={!hasActiveObject}>
 						Remove Selected
 					</button>
 
-					{/* Line 5: Download Image */}
 					<button onClick={downloadImage} className="download-button">
 						Download Image
 					</button>
