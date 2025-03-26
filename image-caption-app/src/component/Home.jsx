@@ -3,59 +3,65 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Home.css";
 
+// Home component: Displays a search interface for Unsplash images and user info
 const Home = () => {
-	const [query, setQuery] = useState("");
-	const [images, setImages] = useState([]);
-	const [isLoading, setIsLoading] = useState(false); // Add loading state
-	const [error, setError] = useState(null); // Add error state
-	const navigate = useNavigate();
+	// State for managing search query, image results, loading status, and errors
+	const [query, setQuery] = useState(""); // User's search input
+	const [images, setImages] = useState([]); // Array of fetched image data
+	const [isLoading, setIsLoading] = useState(false); // Loading state for API requests
+	const [error, setError] = useState(null); // Error message for failed requests or empty input
+	const navigate = useNavigate(); // Hook for programmatic navigation
 
-	// Predefined Name and Email
-	const name = "Your Name"; // Replace with actual name
-	const email = "your.email@example.com"; // Replace with actual email
+	// Static user info (replace with dynamic data in a real app)
+	const name = "Your Name";
+	const email = "your.email@example.com";
 
+	// Fetches images from Unsplash API based on the search query
 	const fetchImages = async () => {
 		if (!query.trim()) {
 			setError("Please enter a search term!");
 			return;
 		}
 
-		setIsLoading(true); // Start loading
+		setIsLoading(true); // Indicate loading has started
 		setError(null); // Clear previous errors
 
 		try {
+			// Make API request to Unsplash with query and API key
 			const response = await axios.get(
 				`https://api.unsplash.com/search/photos?query=${query}&per_page=10&client_id=jke0RrBWP5B6gV9vZGrijW5XOGCMHxJNLkn9vCvB9qo`
 			);
-			setImages(response.data.results);
+			setImages(response.data.results); // Store fetched images
 
-			// Check if no results were found
+			// Handle case where no images are found
 			if (response.data.results.length === 0) {
 				setError(`No results found for "${query}"`);
 			}
 		} catch (error) {
-			console.error("Error fetching images:", error);
+			console.error("Error fetching images:", error); // Log error for debugging
 			setError("Failed to fetch images. Please try again later.");
 		} finally {
-			setIsLoading(false); // Stop loading
+			setIsLoading(false); // Reset loading state
 		}
 	};
 
+	// Navigates to the editor page with the selected image URL
 	const goToEditor = (imageUrl) => {
 		navigate(`/editor?image=${encodeURIComponent(imageUrl)}`);
 	};
 
-	// Handle form submission (Enter key or button click)
+	// Handles form submission to trigger image search
 	const handleSubmit = (e) => {
-		e.preventDefault(); // Prevent page refresh on form submission
+		e.preventDefault(); // Prevent page reload
 		fetchImages();
 	};
 
+	// Render the UI with search bar, user info, and image grid
 	return (
 		<div className="home-container">
 			<h1>Search Images</h1>
 
-			{/* Display Name and Email as static text */}
+			{/* User info display */}
 			<div className="user-info">
 				<div className="info-group">
 					<span className="label">Name:</span>
@@ -67,24 +73,24 @@ const Home = () => {
 				</div>
 			</div>
 
-			{/* Search Bar wrapped in a form */}
+			{/* Search form */}
 			<form className="search-bar" onSubmit={handleSubmit}>
 				<input
 					type="text"
 					placeholder="Enter your search term"
 					value={query}
-					onChange={(e) => setQuery(e.target.value)}
+					onChange={(e) => setQuery(e.target.value)} // Update query state on input change
 				/>
 				<button type="submit" disabled={isLoading}>
-					{isLoading ? "Searching..." : "Search"}
+					{isLoading ? "Searching..." : "Search"} {/* Dynamic button text */}
 				</button>
 			</form>
 
-			{/* Error Message or Loading State */}
+			{/* Display error or loading messages */}
 			{error && <div className="error-message">{error}</div>}
 			{isLoading && <div className="loading-message">Loading images...</div>}
 
-			{/* Image Grid */}
+			{/* Render image grid if results exist */}
 			{!isLoading && !error && images.length > 0 && (
 				<div className="image-grid">
 					{images.map((img) => (
