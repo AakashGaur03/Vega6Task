@@ -1,21 +1,29 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { fabric } from "fabric";
-import "./Editor.css"; // Import the CSS file
+import "./Editor.css";
 
 const Editor = () => {
 	const [searchParams] = useSearchParams();
 	const canvasRef = useRef(null);
 	const canvasInstanceRef = useRef(null);
+	const [captionText, setCaptionText] = useState(""); // State to store the caption input
+	const [hasActiveObject, setHasActiveObject] = useState(false); // State to track active object(s)
 
 	useEffect(() => {
-		// Initialize canvas
+		// Initialize canvas with multi-selection enabled
 		const canvas = new fabric.Canvas(canvasRef.current, {
 			width: 600,
 			height: 400,
 			backgroundColor: "#f0f0f0",
+			selection: true, // Enable selection
 		});
 		canvasInstanceRef.current = canvas;
+
+		// Update active object state when selection changes
+		canvas.on("selection:created", () => setHasActiveObject(true));
+		canvas.on("selection:updated", () => setHasActiveObject(true));
+		canvas.on("selection:cleared", () => setHasActiveObject(false));
 
 		const imageUrl = searchParams.get("image");
 		if (!imageUrl) {
@@ -74,7 +82,12 @@ const Editor = () => {
 			return;
 		}
 
-		const text = new fabric.Textbox("Your Caption", {
+		if (!captionText.trim()) {
+			alert("Please enter a caption!");
+			return;
+		}
+
+		const text = new fabric.Textbox(captionText, {
 			left: 50,
 			top: 50,
 			width: 200,
@@ -86,6 +99,9 @@ const Editor = () => {
 		canvas.add(text);
 		canvas.setActiveObject(text);
 		canvas.renderAll();
+
+		// Reset the input
+		setCaptionText("");
 	};
 
 	const addShape = (shapeType) => {
@@ -147,6 +163,26 @@ const Editor = () => {
 		canvas.renderAll();
 	};
 
+	const removeSelected = () => {
+		const canvas = canvasInstanceRef.current;
+		if (!canvas) {
+			console.error("Canvas not initialized");
+			return;
+		}
+
+		const activeObjects = canvas.getActiveObjects();
+		if (!activeObjects || activeObjects.length === 0) {
+			alert("Please select at least one object to remove!");
+			return;
+		}
+
+		activeObjects.forEach((object) => {
+			canvas.remove(object);
+		});
+		canvas.discardActiveObject(); // Clear the selection
+		canvas.renderAll();
+	};
+
 	const downloadImage = () => {
 		const canvas = canvasInstanceRef.current;
 		if (!canvas) {
@@ -163,6 +199,12 @@ const Editor = () => {
 		link.click();
 	};
 
+	// Handle form submission for caption input (Enter key or button click)
+	const handleCaptionSubmit = (e) => {
+		e.preventDefault();
+		addText();
+	};
+
 	return (
 		<div className="editor-container">
 			<h1>Image Editor</h1>
@@ -174,11 +216,45 @@ const Editor = () => {
 
 				{/* Right Side: Buttons in a Box */}
 				<div className="button-box">
-					<button onClick={addText}>Add Caption</button>
-					<button onClick={() => addShape("triangle")}>Add Triangle</button>
-					<button onClick={() => addShape("rectangle")}>Add Rectangle</button>
-					<button onClick={() => addShape("circle")}>Add Circle</button>
-					<button onClick={() => addShape("polygon")}>Add Polygon</button>
+					{/* Line 1: Caption Form */}
+					<form onSubmit={handleCaptionSubmit} className="caption-form">
+						<span className="caption-label">Add Caption:</span>
+						<div className="caption-input-group">
+							<input
+								type="text"
+								value={captionText}
+								onChange={(e) => setCaptionText(e.target.value)}
+								placeholder="Enter your caption"
+								autoFocus
+							/>
+							<button type="submit">Add</button>
+							<button
+								type="button"
+								onClick={() => setCaptionText("")} // Clear the input
+							>
+								Clear
+							</button>
+						</div>
+					</form>
+
+					{/* Line 2: Add Triangle and Add Rectangle */}
+					<div className="button-row">
+						<button onClick={() => addShape("triangle")}>Add Triangle</button>
+						<button onClick={() => addShape("rectangle")}>Add Rectangle</button>
+					</div>
+
+					{/* Line 3: Add Circle and Add Polygon */}
+					<div className="button-row">
+						<button onClick={() => addShape("circle")}>Add Circle</button>
+						<button onClick={() => addShape("polygon")}>Add Polygon</button>
+					</div>
+
+					{/* Line 4: Remove Selected */}
+					<button onClick={removeSelected} className="remove-button" disabled={!hasActiveObject}>
+						Remove Selected
+					</button>
+
+					{/* Line 5: Download Image */}
 					<button onClick={downloadImage} className="download-button">
 						Download Image
 					</button>

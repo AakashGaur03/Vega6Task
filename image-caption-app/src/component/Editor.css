@@ -31,7 +31,7 @@ h1 {
 	border: 1px solid #ccc;
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between; /* Space buttons evenly, with download at bottom */
+	justify-content: space-between; /* Space rows evenly */
 	padding: 20px;
 	background-color: #f9f9f9;
 	border-radius: 4px;
@@ -53,9 +53,81 @@ h1 {
 }
 
 .button-box .download-button {
-	background-color: #28a745; /* Different color for download button */
+	background-color: #28a745; /* Green for download button */
 }
 
 .button-box .download-button:hover {
 	background-color: #218838;
+}
+
+.button-box .remove-button {
+	background-color: #dc3545; /* Red for remove button */
+}
+
+.button-box .remove-button:hover {
+	background-color: #c82333;
+}
+
+.button-box .remove-button:disabled {
+	background-color: #cccccc;
+	cursor: not-allowed;
+}
+
+.caption-form {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 10px;
+}
+
+.caption-label {
+	font-size: 1rem;
+	font-weight: 500;
+	color: #333;
+	width: 100px; /* Fixed width for the label */
+}
+
+.caption-input-group {
+	display: flex;
+	flex: 1;
+	gap: 10px;
+}
+
+.caption-input-group input {
+	flex: 1;
+	padding: 8px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 1rem;
+}
+
+.caption-input-group button {
+	padding: 8px 16px;
+	background-color: #007bff;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.caption-input-group button:hover {
+	background-color: #0056b3;
+}
+
+.caption-input-group button:last-child {
+	background-color: #dc3545; /* Red for Clear button */
+}
+
+.caption-input-group button:last-child:hover {
+	background-color: #c82333;
+}
+
+.button-row {
+	display: flex;
+	gap: 10px;
+	justify-content: space-between; /* Spread buttons evenly */
+}
+
+.button-row button {
+	flex: 1; /* Each button takes equal width */
 }

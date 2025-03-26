@@ -21,7 +21,7 @@ const Home = () => {
 		}
 
 		setIsLoading(true); // Start loading
-		setError(null); // Clear previous errors (fixed typo: setzenError -> setError)
+		setError(null); // Clear previous errors
 
 		try {
 			const response = await axios.get(
@@ -45,6 +45,12 @@ const Home = () => {
 		navigate(`/editor?image=${encodeURIComponent(imageUrl)}`);
 	};
 
+	// Handle form submission (Enter key or button click)
+	const handleSubmit = (e) => {
+		e.preventDefault(); // Prevent page refresh on form submission
+		fetchImages();
+	};
+
 	return (
 		<div className="home-container">
 			<h1>Search Images</h1>
@@ -61,18 +67,18 @@ const Home = () => {
 				</div>
 			</div>
 
-			{/* Search Bar */}
-			<div className="search-bar">
+			{/* Search Bar wrapped in a form */}
+			<form className="search-bar" onSubmit={handleSubmit}>
 				<input
 					type="text"
 					placeholder="Enter your search term"
 					value={query}
 					onChange={(e) => setQuery(e.target.value)}
 				/>
-				<button onClick={fetchImages} disabled={isLoading}>
+				<button type="submit" disabled={isLoading}>
 					{isLoading ? "Searching..." : "Search"}
 				</button>
-			</div>
+			</form>
 
 			{/* Error Message or Loading State */}
 			{error && <div className="error-message">{error}</div>}
