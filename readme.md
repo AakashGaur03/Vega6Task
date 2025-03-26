@@ -34,7 +34,7 @@ Ensure you have the following installed:
 
 4. Set up environment variables:
 
-   Create a `.env` file in the root directory and add your **Unsplash API Access Key**:
+   Create a `.env` file in the root directory and add your **Key**:
 
    ```sh
    VITE_USER_NAME=name
