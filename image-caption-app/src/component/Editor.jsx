@@ -8,22 +8,12 @@ import "./Editor.css";
  * Allows adding text, shapes, removing objects, and downloading the edited image.
  */
 const Editor = () => {
-	// Retrieve URL search parameters (e.g., ?image=URL) from react-router-dom
 	const [searchParams] = useSearchParams();
-
-	// Reference to the canvas DOM element
 	const canvasRef = useRef(null);
-
-	// Reference to the Fabric.js canvas instance
 	const canvasInstanceRef = useRef(null);
-
-	// State for managing caption text input
+	const buttonBoxRef = useRef(null); // Ref for button-box to set its height
 	const [captionText, setCaptionText] = useState("");
-
-	// State to track if an object is currently selected on the canvas
 	const [hasActiveObject, setHasActiveObject] = useState(false);
-
-	// State to indicate if the background image is loading
 	const [isImageLoading, setIsImageLoading] = useState(true);
 
 	/**
@@ -31,21 +21,35 @@ const Editor = () => {
 	 * Runs when searchParams change.
 	 */
 	useEffect(() => {
-		// Initialize Fabric.js canvas with predefined dimensions and settings
+		// Dynamically calculate canvas dimensions based on container width
+		const canvasContainer = canvasRef.current?.parentElement;
+		const updateCanvasSize = () => {
+			const maxWidth = 600; // Maximum width
+			const containerWidth = canvasContainer?.offsetWidth || maxWidth;
+			const width = Math.min(containerWidth, maxWidth); // Cap at 600px
+			const height = width * (7 / 10); // Maintain ~3:2 aspect ratio (420/600 ≈ 0.7)
+			return { width, height };
+		};
+
+		const { width, height } = updateCanvasSize();
 		const canvas = new fabric.Canvas(canvasRef.current, {
-			width: 600, // Fixed canvas width
-			height: 420, // Fixed canvas height (3:2 aspect ratio)
-			backgroundColor: "#f0f0f0", // Light gray background color
-			selection: true, // Enable object selection
+			width, // Responsive width
+			height, // Responsive height
+			backgroundColor: "#f0f0f0",
+			selection: true,
 		});
 		canvasInstanceRef.current = canvas;
+
+		// Set the button-box height to match the canvas
+		if (buttonBoxRef.current) {
+			buttonBoxRef.current.style.height = `${height}px`;
+		}
 
 		// Bind selection event handlers
 		canvas.on("selection:created", () => setHasActiveObject(true));
 		canvas.on("selection:updated", () => setHasActiveObject(true));
 		canvas.on("selection:cleared", () => setHasActiveObject(false));
 
-		// Extract image URL from search parameters
 		const imageUrl = searchParams.get("image");
 		if (!imageUrl) {
 			console.error("No image URL provided in search parameters");
@@ -53,13 +57,9 @@ const Editor = () => {
 			return;
 		}
 
-		// Decode URL to handle encoded characters
 		const decodedUrl = decodeURIComponent(imageUrl);
-
-		// Set loading state to true while fetching the image
 		setIsImageLoading(true);
 
-		// Load image and set it as the canvas background
 		fabric.Image.fromURL(
 			decodedUrl,
 			(fabricImg) => {
@@ -70,20 +70,17 @@ const Editor = () => {
 					return;
 				}
 
-				// Calculate scale to fit image within canvas dimensions
-				const scale = Math.min(600 / fabricImg.width, 400 / fabricImg.height);
-				fabricImg.scaleToWidth(600 * scale);
-				fabricImg.scaleToHeight(400 * scale);
+				const scale = Math.min(width / fabricImg.width, height / fabricImg.height);
+				fabricImg.scaleToWidth(width * scale);
+				fabricImg.scaleToHeight(height * scale);
 
-				// Configure image properties
 				fabricImg.set({
-					left: 0, // Align to top-left
+					left: 0,
 					top: 0,
-					selectable: false, // Prevent background image from being selected
-					crossOrigin: "anonymous", // Support cross-origin images
+					selectable: false,
+					crossOrigin: "anonymous",
 				});
 
-				// Set image as canvas background and render
 				canvas.setBackgroundImage(fabricImg, canvas.renderAll.bind(canvas), {
 					scaleX: scale,
 					scaleY: scale,
@@ -91,14 +88,32 @@ const Editor = () => {
 					top: 0,
 				});
 
-				// Update loading state once image is loaded
 				setIsImageLoading(false);
 			},
-			{ crossOrigin: "anonymous" } // Cross-origin configuration
+			{ crossOrigin: "anonymous" }
 		);
 
-		// Cleanup function to dispose of canvas instance
+		// Resize handler to adjust canvas and button-box on window resize
+		const handleResize = () => {
+			const { width, height } = updateCanvasSize();
+			canvas.setDimensions({ width, height });
+			if (buttonBoxRef.current) {
+				buttonBoxRef.current.style.height = `${height}px`; // Sync height
+			}
+			const bgImage = canvas.backgroundImage;
+			if (bgImage) {
+				const scale = Math.min(width / bgImage.width, height / bgImage.height);
+				bgImage.scaleToWidth(width * scale);
+				bgImage.scaleToHeight(height * scale);
+				canvas.renderAll();
+			}
+		};
+
+		window.addEventListener("resize", handleResize);
+
+		// Cleanup function
 		return () => {
+			window.removeEventListener("resize", handleResize);
 			if (canvasInstanceRef.current) {
 				canvasInstanceRef.current.dispose();
 				canvasInstanceRef.current = null;
@@ -106,9 +121,6 @@ const Editor = () => {
 		};
 	}, [searchParams]);
 
-	/**
-	 * Adds a textbox with the current caption text to the canvas.
-	 */
 	const addText = () => {
 		const canvas = canvasInstanceRef.current;
 		if (!canvas) {
@@ -121,27 +133,22 @@ const Editor = () => {
 			return;
 		}
 
-		// Create a new textbox object
 		const text = new fabric.Textbox(captionText, {
-			left: 50, // Initial x-position
-			top: 50, // Initial y-position
-			width: 200, // Fixed width
-			fontSize: 20, // Text size
-			fill: "#000000", // Black color
-			fontFamily: "Arial", // Font family
-			editable: true, // Allow in-place editing
+			left: 50,
+			top: 50,
+			width: 200,
+			fontSize: 20,
+			fill: "#000000",
+			fontFamily: "Arial",
+			editable: true,
 		});
 
-		canvas.add(text); // Add textbox to canvas
-		canvas.setActiveObject(text); // Set as active object
-		canvas.renderAll(); // Render changes
-		setCaptionText(""); // Reset input field
+		canvas.add(text);
+		canvas.setActiveObject(text);
+		canvas.renderAll();
+		setCaptionText("");
 	};
 
-	/**
-	 * Adds a shape to the canvas based on the specified type.
-	 * @param {string} shapeType - Type of shape to add ("triangle", "rectangle", "circle", "polygon")
-	 */
 	const addShape = (shapeType) => {
 		const canvas = canvasInstanceRef.current;
 		if (!canvas) {
@@ -194,17 +201,14 @@ const Editor = () => {
 				);
 				break;
 			default:
-				return; // Exit if shapeType is invalid
+				return;
 		}
 
-		canvas.add(shape); // Add shape to canvas
-		canvas.setActiveObject(shape); // Set as active object
-		canvas.renderAll(); // Render changes
+		canvas.add(shape);
+		canvas.setActiveObject(shape);
+		canvas.renderAll();
 	};
 
-	/**
-	 * Removes all currently selected objects from the canvas.
-	 */
 	const removeSelected = () => {
 		const canvas = canvasInstanceRef.current;
 		if (!canvas) {
@@ -218,14 +222,11 @@ const Editor = () => {
 			return;
 		}
 
-		activeObjects.forEach((object) => canvas.remove(object)); // Remove each selected object
-		canvas.discardActiveObject(); // Clear selection
-		canvas.renderAll(); // Render changes
+		activeObjects.forEach((object) => canvas.remove(object));
+		canvas.discardActiveObject();
+		canvas.renderAll();
 	};
 
-	/**
-	 * Downloads the current canvas content as a PNG image.
-	 */
 	const downloadImage = () => {
 		const canvas = canvasInstanceRef.current;
 		if (!canvas) {
@@ -233,34 +234,26 @@ const Editor = () => {
 			return;
 		}
 
-		// Convert canvas to data URL
 		const dataURL = canvas.toDataURL({
 			format: "png",
-			quality: 1.0, // Maximum quality
+			quality: 1.0,
 		});
 
-		// Create and trigger download link
 		const link = document.createElement("a");
 		link.href = dataURL;
 		link.download = "edited-image.png";
 		link.click();
 	};
 
-	/**
-	 * Handles form submission to add caption text.
-	 * @param {Event} e - Form submission event
-	 */
 	const handleCaptionSubmit = (e) => {
-		e.preventDefault(); // Prevent page refresh
-		addText(); // Call addText function
+		e.preventDefault();
+		addText();
 	};
 
-	// Render the editor UI
 	return (
 		<div className="editor-container">
 			<h1>Image Editor</h1>
 			<div className="editor-layout">
-				{/* Canvas container with loading overlay */}
 				<div className="canvas-container">
 					<canvas ref={canvasRef} className="editor-canvas" />
 					{isImageLoading && (
@@ -271,9 +264,7 @@ const Editor = () => {
 					)}
 				</div>
 
-				{/* Control panel for editing options */}
-				<div className="button-box">
-					{/* Form for adding captions */}
+				<div className="button-box" ref={buttonBoxRef}>
 					<form onSubmit={handleCaptionSubmit} className="caption-form">
 						<span className="caption-label">Add Caption:</span>
 						<div className="caption-input-group">
@@ -293,24 +284,20 @@ const Editor = () => {
 						</div>
 					</form>
 
-					{/* Shape buttons: Triangle and Rectangle */}
 					<div className="button-row">
 						<button onClick={() => addShape("triangle")}>Add Triangle</button>
 						<button onClick={() => addShape("rectangle")}>Add Rectangle</button>
 					</div>
 
-					{/* Shape buttons: Circle and Polygon */}
 					<div className="button-row">
 						<button onClick={() => addShape("circle")}>Add Circle</button>
 						<button onClick={() => addShape("polygon")}>Add Polygon</button>
 					</div>
 
-					{/* Button to remove selected objects */}
 					<button onClick={removeSelected} className="remove-button" disabled={!hasActiveObject}>
 						Remove Selected
 					</button>
 
-					{/* Button to download the edited image */}
 					<button onClick={downloadImage} className="download-button">
 						Download Image
 					</button>

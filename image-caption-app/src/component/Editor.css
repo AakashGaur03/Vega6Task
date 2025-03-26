@@ -1,30 +1,38 @@
 .editor-container {
-	padding: 20px;
-	max-width: 1300px; /* Adjusted to fit both canvas and button box */
+	padding: 1rem; /* Responsive padding */
+	max-width: 1300px;
 	margin: 0 auto;
+	width: 100%;
+	box-sizing: border-box;
 }
 
 h1 {
 	text-align: center;
-	margin-bottom: 20px;
+	margin-bottom: 1.5rem;
+	font-size: clamp(1.5rem, 5vw, 2.5rem); /* Responsive font size */
 }
 
 .editor-layout {
 	display: flex;
-	gap: 20px;
-	align-items: flex-start;
-	flex-wrap: wrap;
+	gap: 1.25rem; /* 20px in rem */
+	align-items: stretch; /* Ensure children stretch to match height */
+	flex-wrap: wrap; /* Allow stacking on small screens */
 }
 
 .canvas-container {
 	flex: 1;
-	position: relative; /* Added for positioning the loader */
+	position: relative;
+	min-width: 0; /* Prevent flex shrinkage issues */
+	width: 100%;
+	display: flex; /* Ensure canvas fills container */
 }
 
 .editor-canvas {
 	border: 1px solid #ccc;
-	width: 600px;
-	height: 420px;
+	width: 100%;
+	max-width: 600px; /* Cap width */
+	height: 100%; /* Fill container height, controlled by JS */
+	display: block;
 }
 
 /* Loader styles */
@@ -34,7 +42,7 @@ h1 {
 	left: 0;
 	width: 100%;
 	height: 100%;
-	background: rgba(255, 255, 255, 0.8); /* Semi-transparent overlay */
+	background: rgba(255, 255, 255, 0.8);
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -42,10 +50,10 @@ h1 {
 }
 
 .spinner {
-	width: 40px;
-	height: 40px;
-	border: 4px solid #f3f3f3; /* Light gray border */
-	border-top: 4px solid #3498db; /* Blue spinning part */
+	width: clamp(1.875rem, 5vw, 2.5rem); /* 30px to 40px */
+	height: clamp(1.875rem, 5vw, 2.5rem);
+	border: 4px solid #f3f3f3;
+	border-top: 4px solid #3498db;
 	border-radius: 50%;
 	animation: spin 1s linear infinite;
 }
@@ -60,35 +68,33 @@ h1 {
 }
 
 .canvas-loader p {
-	margin-top: 10px;
-	font-size: 1rem;
+	margin-top: 0.625rem; /* 10px in rem */
+	font-size: clamp(0.875rem, 2.5vw, 1rem);
 	color: #333;
-}
-.add-button:disabled {
-	opacity: 0.5; /* Fade effect */
-	cursor: not-allowed; /* Disable pointer */
 }
 
 .button-box {
-	width: 600px; /* Same width as canvas */
-	height: 420px; /* Same height as canvas */
+	width: 100%;
+	max-width: 600px; /* Match canvas max-width */
 	border: 1px solid #ccc;
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between; /* Space rows evenly */
-	padding: 20px;
+	justify-content: space-between;
+	gap: 1rem; /* Flexible spacing */
+	padding: 1.25rem; /* 20px in rem */
 	background-color: #f9f9f9;
 	border-radius: 4px;
+	box-sizing: border-box; /* Include padding in height */
 }
 
 .button-box button {
-	padding: 10px;
+	padding: 0.625rem; /* 10px in rem */
 	background-color: #007bff;
 	color: white;
 	border: none;
 	border-radius: 4px;
 	cursor: pointer;
-	font-size: 1rem;
+	font-size: clamp(0.875rem, 2.5vw, 1rem);
 	transition: background-color 0.2s ease;
 }
 
@@ -97,7 +103,7 @@ h1 {
 }
 
 .button-box .download-button {
-	background-color: #28a745; /* Green for download button */
+	background-color: #28a745;
 }
 
 .button-box .download-button:hover {
@@ -105,7 +111,7 @@ h1 {
 }
 
 .button-box .remove-button {
-	background-color: #dc3545; /* Red for remove button */
+	background-color: #dc3545;
 }
 
 .button-box .remove-button:hover {
@@ -117,36 +123,43 @@ h1 {
 	cursor: not-allowed;
 }
 
+.add-button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
 .caption-form {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	margin-bottom: 10px;
+	gap: 0.625rem; /* 10px in rem */
+	flex-wrap: wrap; /* Allow wrapping */
+	margin-bottom: 0.625rem;
 }
 
 .caption-label {
-	font-size: 1rem;
+	font-size: clamp(0.875rem, 2.5vw, 1rem);
 	font-weight: 500;
 	color: #333;
-	width: 100px; /* Fixed width for the label */
+	min-width: 6.25rem; /* 100px in rem, adjustable */
 }
 
 .caption-input-group {
 	display: flex;
 	flex: 1;
-	gap: 10px;
+	gap: 0.625rem;
+	min-width: 0;
 }
 
 .caption-input-group input {
 	flex: 1;
-	padding: 8px;
+	padding: 0.5rem; /* 8px in rem */
 	border: 1px solid #ccc;
 	border-radius: 4px;
-	font-size: 1rem;
+	font-size: clamp(0.875rem, 2.5vw, 1rem);
 }
 
 .caption-input-group button {
-	padding: 8px 16px;
+	padding: 0.5rem 1rem; /* 8px 16px in rem */
 	background-color: #007bff;
 	color: white;
 	border: none;
@@ -159,7 +172,7 @@ h1 {
 }
 
 .caption-input-group button:last-child {
-	background-color: #dc3545; /* Red for Clear button */
+	background-color: #dc3545;
 }
 
 .caption-input-group button:last-child:hover {
@@ -168,10 +181,65 @@ h1 {
 
 .button-row {
 	display: flex;
-	gap: 10px;
-	justify-content: space-between; /* Spread buttons evenly */
+	gap: 0.625rem; /* 10px in rem */
+	justify-content: space-between;
+	flex-wrap: wrap; /* Allow wrapping */
 }
 
 .button-row button {
-	flex: 1; /* Each button takes equal width */
+	flex: 1;
+	min-width: 6.25rem; /* 100px in rem */
+}
+
+/* Media Queries */
+@media (max-width: 1024px) {
+	.editor-layout {
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.canvas-container,
+	.button-box {
+		max-width: 100%;
+	}
+}
+
+@media (max-width: 768px) {
+	.caption-form {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.caption-label {
+		width: 100%;
+		text-align: left;
+	}
+
+	.caption-input-group {
+		flex-direction: column;
+	}
+
+	.caption-input-group button {
+		width: 100%;
+	}
+
+	.button-row {
+		flex-direction: column;
+	}
+
+	.button-row button {
+		width: 100%;
+	}
+}
+
+@media (max-width: 480px) {
+	.editor-container {
+		padding: 0.5rem;
+	}
+
+	.spinner {
+		width: 1.5625rem; /* 25px in rem */
+		height: 1.5625rem;
+		border-width: 3px;
+	}
 }
