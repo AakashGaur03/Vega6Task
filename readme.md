@@ -105,4 +105,4 @@ npm run preview
 
 ## 🔗 Live Demo
 
-## Check out the live application: [Vega6 Task](https://vega6-task.vercel.app/)
+## Check out the live application: [Vega6 Task](https://vega6task.onrender.com/)
