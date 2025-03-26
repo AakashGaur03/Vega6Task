@@ -13,6 +13,7 @@ h1 {
 	display: flex;
 	gap: 20px;
 	align-items: flex-start;
+	flex-wrap: wrap;
 }
 
 .canvas-container {
@@ -23,7 +24,7 @@ h1 {
 .editor-canvas {
 	border: 1px solid #ccc;
 	width: 600px;
-	height: 400px;
+	height: 420px;
 }
 
 /* Loader styles */
@@ -63,10 +64,14 @@ h1 {
 	font-size: 1rem;
 	color: #333;
 }
+.add-button:disabled {
+	opacity: 0.5; /* Fade effect */
+	cursor: not-allowed; /* Disable pointer */
+}
 
 .button-box {
 	width: 600px; /* Same width as canvas */
-	height: 400px; /* Same height as canvas */
+	height: 420px; /* Same height as canvas */
 	border: 1px solid #ccc;
 	display: flex;
 	flex-direction: column;

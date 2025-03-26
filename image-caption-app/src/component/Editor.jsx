@@ -34,7 +34,7 @@ const Editor = () => {
 		// Initialize Fabric.js canvas with predefined dimensions and settings
 		const canvas = new fabric.Canvas(canvasRef.current, {
 			width: 600, // Fixed canvas width
-			height: 400, // Fixed canvas height (3:2 aspect ratio)
+			height: 420, // Fixed canvas height (3:2 aspect ratio)
 			backgroundColor: "#f0f0f0", // Light gray background color
 			selection: true, // Enable object selection
 		});
@@ -284,7 +284,9 @@ const Editor = () => {
 								placeholder="Enter your caption"
 								autoFocus
 							/>
-							<button type="submit">Add</button>
+							<button type="submit" disabled={!captionText.trim()} className="add-button">
+								Add
+							</button>
 							<button type="button" onClick={() => setCaptionText("")}>
 								Clear
 							</button>
