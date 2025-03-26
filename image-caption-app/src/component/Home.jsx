@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Home.css";
 
-// Home component: Displays a search interface for Unsplash images and user info
+/**
+ * Home component: Displays a search interface for Unsplash images and user info.
+ */
 const Home = () => {
 	// State for managing search query, image results, loading status, and errors
 	const [query, setQuery] = useState(""); // User's search input
@@ -12,14 +14,23 @@ const Home = () => {
 	const [error, setError] = useState(null); // Error message for failed requests or empty input
 	const navigate = useNavigate(); // Hook for programmatic navigation
 
-	// Static user info (replace with dynamic data in a real app)
-	const name = "Your Name";
-	const email = "your.email@example.com";
+	// Retrieve user info and API settings from environment variables
+	const name = import.meta.env.VITE_USER_NAME || "Default Name"; // Fallback if not set
+	const email = import.meta.env.VITE_USER_EMAIL || "default.email@example.com"; // Fallback if not set
+	const unsplashApiUrl = import.meta.env.VITE_UNSPLASH_API_URL || "https://api.unsplash.com/search/photos"; // Fallback URL
+	const accessKey = import.meta.env.VITE_UNSPLASH_ACCESS_KEY; // No fallback, required
 
-	// Fetches images from Unsplash API based on the search query
+	/**
+	 * Fetches images from Unsplash API based on the search query.
+	 */
 	const fetchImages = async () => {
 		if (!query.trim()) {
 			setError("Please enter a search term!");
+			return;
+		}
+
+		if (!accessKey) {
+			setError("Unsplash API access key is missing!");
 			return;
 		}
 
@@ -28,9 +39,7 @@ const Home = () => {
 
 		try {
 			// Make API request to Unsplash with query and API key
-			const response = await axios.get(
-				`https://api.unsplash.com/search/photos?query=${query}&per_page=10&client_id=jke0RrBWP5B6gV9vZGrijW5XOGCMHxJNLkn9vCvB9qo`
-			);
+			const response = await axios.get(`${unsplashApiUrl}?query=${query}&per_page=10&client_id=${accessKey}`);
 			setImages(response.data.results); // Store fetched images
 
 			// Handle case where no images are found
@@ -45,12 +54,18 @@ const Home = () => {
 		}
 	};
 
-	// Navigates to the editor page with the selected image URL
+	/**
+	 * Navigates to the editor page with the selected image URL.
+	 * @param {string} imageUrl - URL of the selected image
+	 */
 	const goToEditor = (imageUrl) => {
 		navigate(`/editor?image=${encodeURIComponent(imageUrl)}`);
 	};
 
-	// Handles form submission to trigger image search
+	/**
+	 * Handles form submission to trigger image search.
+	 * @param {Event} e - Form submission event
+	 */
 	const handleSubmit = (e) => {
 		e.preventDefault(); // Prevent page reload
 		fetchImages();
