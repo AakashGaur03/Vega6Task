@@ -123,6 +123,14 @@ h1 {
 	cursor: not-allowed;
 }
 
+.button-box .log-button {
+	background-color: #6c757d; /* Gray for debugging */
+}
+
+.button-box .log-button:hover {
+	background-color: #5a6268;
+}
+
 .add-button:disabled {
 	opacity: 0.5;
 	cursor: not-allowed;
@@ -189,6 +197,28 @@ h1 {
 .button-row button {
 	flex: 1;
 	min-width: 6.25rem; /* 100px in rem */
+}
+
+/* Optional: Styles for displaying layers in UI */
+.layers-display {
+	margin-top: 1.5rem;
+	padding: 1rem;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	background-color: #f9f9f9;
+	max-height: 300px;
+	overflow-y: auto;
+}
+
+.layers-display h2 {
+	font-size: 1.25rem;
+	margin-bottom: 0.5rem;
+}
+
+.layers-display pre {
+	font-size: 0.875rem;
+	white-space: pre-wrap;
+	word-wrap: break-word;
 }
 
 /* Media Queries */

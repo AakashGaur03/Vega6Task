@@ -15,6 +15,81 @@ const Editor = () => {
 	const [captionText, setCaptionText] = useState("");
 	const [hasActiveObject, setHasActiveObject] = useState(false);
 	const [isImageLoading, setIsImageLoading] = useState(true);
+	// Optional: Uncomment to display layers in UI
+	// const [canvasLayers, setCanvasLayers] = useState([]);
+
+	/**
+	 * Logs all canvas layers and their attributes to the console.
+	 */
+	const logCanvasLayers = () => {
+		const canvas = canvasInstanceRef.current;
+		if (!canvas) {
+			return;
+		}
+
+		const layers = [];
+
+		// Add background image if it exists
+		const bgImage = canvas.backgroundImage;
+		if (bgImage) {
+			layers.push({
+				type: "background-image",
+				url: bgImage.getSrc(),
+				width: bgImage.width * bgImage.scaleX,
+				height: bgImage.height * bgImage.scaleY,
+				scaleX: bgImage.scaleX,
+				scaleY: bgImage.scaleY,
+				left: bgImage.left,
+				top: bgImage.top,
+			});
+		}
+
+		// Add all canvas objects (text, shapes, etc.)
+		const objects = canvas.getObjects();
+		objects.forEach((obj) => {
+			const layer = {
+				type: obj.type,
+				left: obj.left,
+				top: obj.top,
+				angle: obj.angle,
+				scaleX: obj.scaleX,
+				scaleY: obj.scaleY,
+			};
+
+			// Add type-specific attributes
+			switch (obj.type) {
+				case "textbox":
+					layer.text = obj.text;
+					layer.fontSize = obj.fontSize;
+					layer.fontFamily = obj.fontFamily;
+					layer.fill = obj.fill;
+					layer.width = obj.width;
+					break;
+				case "triangle":
+				case "rect":
+					layer.width = obj.width * obj.scaleX;
+					layer.height = obj.height * obj.scaleY;
+					layer.fill = obj.fill;
+					break;
+				case "circle":
+					layer.radius = obj.radius * obj.scaleX; // Scale affects radius
+					layer.fill = obj.fill;
+					break;
+				case "polygon":
+					layer.points = obj.points.map((p) => ({ x: p.x, y: p.y }));
+					layer.fill = obj.fill;
+					break;
+				default:
+					break;
+			}
+
+			layers.push(layer);
+		});
+
+		console.log("Canvas Layers:", layers);
+		// Optional: Uncomment to set state for UI display
+		// setCanvasLayers(layers);
+	};
 
 	/**
 	 * Effect to initialize the Fabric.js canvas and load the background image.
@@ -49,6 +124,11 @@ const Editor = () => {
 		canvas.on("selection:created", () => setHasActiveObject(true));
 		canvas.on("selection:updated", () => setHasActiveObject(true));
 		canvas.on("selection:cleared", () => setHasActiveObject(false));
+
+		// Add event listeners for canvas changes to log layers
+		canvas.on("object:added", logCanvasLayers);
+		canvas.on("object:removed", logCanvasLayers);
+		canvas.on("object:modified", logCanvasLayers);
 
 		const imageUrl = searchParams.get("image");
 		if (!imageUrl) {
@@ -89,6 +169,7 @@ const Editor = () => {
 				});
 
 				setIsImageLoading(false);
+				logCanvasLayers(); // Log initial state after background image is set
 			},
 			{ crossOrigin: "anonymous" }
 		);
@@ -297,7 +378,9 @@ const Editor = () => {
 					<button onClick={removeSelected} className="remove-button" disabled={!hasActiveObject}>
 						Remove Selected
 					</button>
-
+					<button onClick={logCanvasLayers} className="log-button">
+						Log Canvas Layers
+					</button>
 					<button onClick={downloadImage} className="download-button">
 						Download Image
 					</button>
