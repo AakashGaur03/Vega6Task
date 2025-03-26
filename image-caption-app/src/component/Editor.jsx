@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { fabric } from "fabric";
+import "./Editor.css"; // Import the CSS file
 
 const Editor = () => {
 	const [searchParams] = useSearchParams();
@@ -96,10 +97,11 @@ const Editor = () => {
 
 		let shape;
 		switch (shapeType) {
-			case "circle":
-				shape = new fabric.Circle({
-					radius: 30,
-					fill: "red",
+			case "triangle":
+				shape = new fabric.Triangle({
+					width: 80,
+					height: 60,
+					fill: "green",
 					left: 50,
 					top: 50,
 				});
@@ -113,14 +115,29 @@ const Editor = () => {
 					top: 50,
 				});
 				break;
-			case "triangle":
-				shape = new fabric.Triangle({
-					width: 80,
-					height: 60,
-					fill: "green",
+			case "circle":
+				shape = new fabric.Circle({
+					radius: 30,
+					fill: "red",
 					left: 50,
 					top: 50,
 				});
+				break;
+			case "polygon":
+				shape = new fabric.Polygon(
+					[
+						{ x: 50, y: 50 },
+						{ x: 100, y: 50 },
+						{ x: 120, y: 90 },
+						{ x: 80, y: 120 },
+						{ x: 40, y: 90 },
+					],
+					{
+						fill: "purple",
+						left: 50,
+						top: 50,
+					}
+				);
 				break;
 			default:
 				return;
@@ -147,27 +164,25 @@ const Editor = () => {
 	};
 
 	return (
-		<div style={{ padding: "20px" }}>
+		<div className="editor-container">
 			<h1>Image Editor</h1>
-			<div style={{ marginBottom: "20px" }}>
-				<canvas ref={canvasRef} style={{ border: "1px solid #ccc" }} />
-			</div>
-			<div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-				<button onClick={addText} style={{ padding: "8px 16px", cursor: "pointer" }}>
-					Add Text
-				</button>
-				<button onClick={() => addShape("circle")} style={{ padding: "8px 16px", cursor: "pointer" }}>
-					Add Circle
-				</button>
-				<button onClick={() => addShape("rectangle")} style={{ padding: "8px 16px", cursor: "pointer" }}>
-					Add Rectangle
-				</button>
-				<button onClick={() => addShape("triangle")} style={{ padding: "8px 16px", cursor: "pointer" }}>
-					Add Triangle
-				</button>
-				<button onClick={downloadImage} style={{ padding: "8px 16px", cursor: "pointer" }}>
-					Download
-				</button>
+			<div className="editor-layout">
+				{/* Left Side: Canvas */}
+				<div className="canvas-container">
+					<canvas ref={canvasRef} className="editor-canvas" />
+				</div>
+
+				{/* Right Side: Buttons in a Box */}
+				<div className="button-box">
+					<button onClick={addText}>Add Caption</button>
+					<button onClick={() => addShape("triangle")}>Add Triangle</button>
+					<button onClick={() => addShape("rectangle")}>Add Rectangle</button>
+					<button onClick={() => addShape("circle")}>Add Circle</button>
+					<button onClick={() => addShape("polygon")}>Add Polygon</button>
+					<button onClick={downloadImage} className="download-button">
+						Download Image
+					</button>
+				</div>
 			</div>
 		</div>
 	);
