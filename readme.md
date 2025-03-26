@@ -103,6 +103,6 @@ npm run preview
 - The app is fully responsive.
 - Ensure to refresh the page when testing responsiveness for accurate results.
 
-### 🔗 Live Demo
+## 🔗 Live Demo
 
-Check out the live application: [Vega6 Task](https://vega6-task.vercel.app/)
+## Check out the live application: [Vega6 Task](https://vega6-task.vercel.app/)
